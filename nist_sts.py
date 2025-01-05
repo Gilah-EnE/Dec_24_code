@@ -1,4 +1,4 @@
-from sts import FrequencyTest, RunTest, Spectral, TemplateMatching, Universal, Complexity, Serial, ApproximateEntropy, CumulativeSum, RandomExcursions
+from randomness_testsuite import FrequencyTest, RunTest, Spectral, TemplateMatching, Universal, Complexity, Serial, ApproximateEntropy, CumulativeSum, RandomExcursions
 import sys
 from collections import Counter
 

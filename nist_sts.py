@@ -1,6 +1,11 @@
-from randomness_testsuite import FrequencyTest, RunTest, Spectral, TemplateMatching, Universal, Complexity, Serial, ApproximateEntropy, CumulativeSum, RandomExcursions
 import sys
 from collections import Counter
+
+from randomness_testsuite import (ApproximateEntropy, Complexity,
+                                  CumulativeSum, FrequencyTest,
+                                  RandomExcursions, RunTest, Serial, Spectral,
+                                  TemplateMatching, Universal)
+
 
 def to_bin(data):
     if type(data) == str:
@@ -10,6 +15,7 @@ def to_bin(data):
         return bin(int.from_bytes(data, byteorder=sys.byteorder))[2:]
     else:
         raise TypeError
+
 
 def nist_tests(data) -> bool:
     d = to_bin(data)
@@ -52,7 +58,23 @@ def nist_tests(data) -> bool:
     for excursion in excursions_var_data:
         excursions_var_verdict = excursions_var_verdict and excursion[4]
 
-    verdcits = [monobit_verdict, block_freq_verdict, runs_verdict, longest_run_verdict, fft_verdict, nonoverlap_verdict, overlap_verdict, maurer_verdict, linear_verdict, serial_verdict, entropy_verdict, cusum_forward_verdict, cusum_backward_verdict, excursions_verdict, excursions_var_verdict]
+    verdcits = [
+        monobit_verdict,
+        block_freq_verdict,
+        runs_verdict,
+        longest_run_verdict,
+        fft_verdict,
+        nonoverlap_verdict,
+        overlap_verdict,
+        maurer_verdict,
+        linear_verdict,
+        serial_verdict,
+        entropy_verdict,
+        cusum_forward_verdict,
+        cusum_backward_verdict,
+        excursions_verdict,
+        excursions_var_verdict,
+    ]
 
     verdicts_counter = Counter(verdcits)
 

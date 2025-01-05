@@ -1,5 +1,9 @@
-from statistical_analysis import compression_test
+import autocorr_test
+import contextual_analysis
+import kolmogorov_test
+import nist_sts
+import pearson_criterion
+import primary_analysis
+import statistical_analysis
+import structural_analysis
 
-with open("c:/Users/Gilah/Documents/Зразки шифрування/xaa", "rb") as file:
-    data = file.read()
-    print(compression_test(data))

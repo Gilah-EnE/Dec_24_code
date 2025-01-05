@@ -1,3 +1,6 @@
 [submodule "randomness_testsuite"]
 	path = randomness_testsuite
 	url = https://github.com/stevenang/randomness_testsuite
+[submodule "pygpt"]
+	path = pygpt
+	url = https://github.com/pvachon/pygpt

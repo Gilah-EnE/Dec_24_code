@@ -217,73 +217,21 @@ class DiskImageAnalyzer:
 
 
 # Приклад використання:
-if __name__ == "__main__":
-    files = [
-        "ext4_fs.bin",
-        "fat32_nintendo_ds_sdcard.bin",
-        "gpt_table_sample.bin",
-        "joyeuse_global_images_V12.0.4.0.RJZMIXM_20210723.0000.00_11.0_global_ecbafbeec7.tgz",
-        "mbr_sample.bin",
-        "ntfs_data_1.bin",
-        "ntfs_data_2.bin",
-        "sony_gpt_partitions_sample.bin",
-        "urandom_10mb.bin",
-        "urandom_1gb.bin",
-        "veracrypt",
-        "wd400_encrypted_1.bin",
-        "wd400_encrypted_2.img",
-        "xaa",
-        "xab",
-        "xac",
-        "xad",
-        "xae",
-        "xaf",
-        "xag",
-        "xah",
-        "xai",
-        "xaj",
-        "xak",
-        "xal",
-        "xam",
-        "xan",
-        "xao",
-        "xap",
-        "xaq",
-        "xar",
-        "xas",
-        "xat",
-    ]
-
+def analyze_image_file(image_path: str, plot: bool):
     analyzer = DiskImageAnalyzer()
 
-    for file in files:
-        results = analyzer.analyze_image_region(file, start_offset=0, num_blocks=2000)
-        autocorr_stat = list()
-
-        for offset, autocorr, is_encrypted in results:
-            autocorr_stat.append(autocorr)
-
-        stat, p = shapiro(autocorr_stat)
-        alpha = 0.05
-
-        print(f"{file}: {np.std(autocorr_stat):.6f}")
-
-    """analyzer = DiskImageAnalyzer()
-    image_path = "enc.bin"  # Шлях до файлу образу
-    
     # Аналіз великого регіону диску
     results = analyzer.analyze_image_region(image_path, start_offset=0, num_blocks=5000)
-    
-    autocorr_stat = list()
 
-    # Виведення текстових результатів
-    print("Детальні результати аналізу:")
-    for offset, autocorr, is_encrypted in results:
-        # print(f"Offset: {offset:08x}, Автокореляція: {autocorr:.4f}, Можливо шифрування: {is_encrypted}")
+    autocorr_stat = list()
+    for _, autocorr, _ in results:
         autocorr_stat.append(autocorr)
 
-    print(np.std(a=preprocessing.normalize([autocorr_stat])))
-    print(np.std(autocorr_stat))
-    
+    if autocorr_stat == []:
+        raise ValueError("File is empty")
+
     # Створення XY-графіку результатів
-    analyzer.plot_analysis_scatter(results, "Розподіл автокореляції по зсуву")"""
+    if plot:
+        analyzer.plot_analysis_scatter(results, "Розподіл автокореляції по зсуву")
+
+    return np.mean(autocorr_stat)

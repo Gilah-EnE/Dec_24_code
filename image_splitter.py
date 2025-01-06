@@ -18,22 +18,26 @@ class GPTReader(object):
     @property
     def block_reader(self):
         return self._file
-    
-def split_image(fname: str, sector_size=512) -> list:
-    reader = GPTReader(fname, sector_size=sector_size)
 
+
+def split_image(fname: str, sector_size=512, dry_run=True) -> list:
+    reader = GPTReader(fname, sector_size=sector_size)
     files = list()
+
+    if len(list(reader.partition_table.valid_entries())) == 0:
+        raise ValueError("No valid partitions found")
 
     for partition in reader.partition_table.valid_entries():
         file_base_name = partition.partition_id
-    
+
         out_file = os.path.join(os.getcwd(), f"{file_base_name}.bin")
         files.append(out_file)
 
-        with open(out_file, "wb+") as fout:
-            for block in reader.block_reader.blocks_in_range(partition.first_block, partition.length):
-                fout.write(block)
+        if not dry_run:
+            with open(out_file, "wb+") as fout:
+                for block in reader.block_reader.blocks_in_range(
+                    partition.first_block, partition.length
+                ):
+                    fout.write(block)
 
     return files
-
-# print(split_image('/home/gilah/Documents/test_gpt.bin'))

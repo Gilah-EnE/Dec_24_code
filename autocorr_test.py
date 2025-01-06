@@ -234,4 +234,4 @@ def analyze_image_file(image_path: str, plot: bool):
     if plot:
         analyzer.plot_analysis_scatter(results, "Розподіл автокореляції по зсуву")
 
-    return np.mean(autocorr_stat)
+    return np.std(autocorr_stat)

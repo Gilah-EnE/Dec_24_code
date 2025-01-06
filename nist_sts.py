@@ -17,7 +17,7 @@ def to_bin(data):
         raise TypeError
 
 
-def nist_tests(data) -> bool:
+def nist_tests(data) -> list:
     d = to_bin(data)
 
     freq = FrequencyTest.FrequencyTest()
@@ -58,7 +58,7 @@ def nist_tests(data) -> bool:
     for excursion in excursions_var_data:
         excursions_var_verdict = excursions_var_verdict and excursion[4]
 
-    verdcits = [
+    return [
         monobit_verdict,
         block_freq_verdict,
         runs_verdict,
@@ -75,12 +75,3 @@ def nist_tests(data) -> bool:
         excursions_verdict,
         excursions_var_verdict,
     ]
-
-    verdicts_counter = Counter(verdcits)
-
-    print(verdicts_counter)
-
-    if verdicts_counter[True] > verdicts_counter[False]:
-        return True
-    elif verdicts_counter[True] <= verdicts_counter[False]:
-        return False

@@ -26,7 +26,7 @@ def calculate_kolmogorov_smirnov(
 
     # Перевіряємо коректність вхідних даних
     if not all(0 <= b <= 255 for b in bytes_list):
-        raise ValueError("Всі значення повинні бути в діапазоні 0-255")
+        raise ValueError("Byte values out of range")
 
     # Підраховуємо частоти
     n = len(bytes_list)
@@ -82,8 +82,16 @@ def interpret_ks_result(ks_statistic: float, sample_size: int) -> str:
         return "Є незначні відхилення від рівномірного розподілу (0.01 < p ≤ 0.05)"
     else:
         return "Значні відхилення від рівномірного розподілу (p ≤ 0.01)"
+    
+def calculate_ks_file(partition_path: str):
+    with open(partition_path, 'rb') as file:
+        ks_statistic, info = calculate_kolmogorov_smirnov(file.read())
 
-
+    if ks_statistic <= info['critical_value_005'] or ks_statistic <= info['critical_value_001']:
+        return False
+    else:
+        return True
+'''
 # test_bytes = bytes([1, 2, 3, 4, 5] * 1000)  # тестові дані
 
 with open("test.img", "rb") as file:
@@ -95,3 +103,4 @@ print(f"Критичне значення (α = 0.01): {info['critical_value_001
 print(f"Критичне значення (α = 0.05): {info['critical_value_005']}")
 print("\nІнтерпретація:")
 print(interpret_ks_result(ks_statistic, info["sample_size"]))
+'''

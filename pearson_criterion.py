@@ -64,9 +64,10 @@ def interpret_pearson_result(
         return "Розподіл відхиляється від рівномірного"
 
 
-with open("test.img", "rb") as file:
+'''with open("test.img", "rb") as file:
     test_bytes = file.read()
 chi_square = calculate_pearson_criterion(test_bytes)
 
 print("Статистика Пірсона:", chi_square)
 print(interpret_pearson_result(chi_square=chi_square))
+'''

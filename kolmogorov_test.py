@@ -1,38 +1,24 @@
 from collections import Counter
 from typing import Tuple, Union
-
+import time
 import numpy as np
 
 
 def calculate_kolmogorov_smirnov(
-    bytes_data: Union[bytes, list[int]]
+    filename: str
 ) -> Tuple[float, dict]:
-    """
-    Розраховує статистику критерію Колмогорова-Смірнова для набору байтів відносно рівномірного розподілу.
+    n = 0
+    counter = Counter("")
 
-    Args:
-        bytes_data: Набір байтів у вигляді bytes або список цілих чисел від 0 до 255
-
-    Returns:
-        Tuple[float, dict]: Кортеж, що містить:
-            - значення статистики Колмогорова-Смірнова
-            - словник з додатковою інформацією (максимальне відхилення, його позиція)
-    """
-    # Перетворюємо вхідні дані в список байтів, якщо потрібно
-    if isinstance(bytes_data, bytes):
-        bytes_list = list(bytes_data)
-    else:
-        bytes_list = bytes_data
-
-    # Перевіряємо коректність вхідних даних
-    if not all(0 <= b <= 255 for b in bytes_list):
-        raise ValueError("Byte values out of range")
-
-    # Підраховуємо частоти
-    n = len(bytes_list)
-    counter = Counter(bytes_list)
-
-    del bytes_list
+    with open(filename, 'rb') as file:
+        while True:
+            chunk = file.read(512*1024*1024)
+            if not chunk:
+                break
+            n += len(chunk)
+            print(n/1024/1024)
+            counter += Counter(chunk)
+            del chunk
 
     # Створюємо емпіричну функцію розподілу
     empirical_cdf = np.zeros(256)
@@ -84,8 +70,7 @@ def interpret_ks_result(ks_statistic: float, sample_size: int) -> str:
         return "Значні відхилення від рівномірного розподілу (p ≤ 0.01)"
     
 def calculate_ks_file(partition_path: str):
-    with open(partition_path, 'rb') as file:
-        ks_statistic, info = calculate_kolmogorov_smirnov(file.read())
+    ks_statistic, info = calculate_kolmogorov_smirnov(partition_path)
 
     if ks_statistic <= info['critical_value_005'] or ks_statistic <= info['critical_value_001']:
         return False
@@ -104,3 +89,8 @@ print(f"Критичне значення (α = 0.05): {info['critical_value_005
 print("\nІнтерпретація:")
 print(interpret_ks_result(ks_statistic, info["sample_size"]))
 '''
+
+start = time.time()
+print(calculate_kolmogorov_smirnov("ext4_fs.bin"))
+end = time.time()
+print(end - start)

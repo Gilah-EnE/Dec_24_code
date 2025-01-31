@@ -1,7 +1,7 @@
 import bz2
 import gzip
 import lzma
-import math
+import mpmath
 import statistics
 import zlib
 from collections import Counter
@@ -9,20 +9,21 @@ from collections import Counter
 import zstandard as zstd
 
 
-def entropy_calc(data) -> float:
+def entropy_estimation(data) -> float:
     if type(data) in (bytes, bytearray):
         pass
     elif type(data) == str:
         data = data.encode("utf-8")
     else:
         raise TypeError(f"A bytes-like object or string was expected, got {type(data)}")
+
     byte_counts = Counter(data)
     total_bytes = len(data)
-    entropy = 0.0
+    entropy = mpmath.mpf(0)
 
     for count in byte_counts.values():
-        p = count / total_bytes
-        entropy += p * math.log2(p)
+        p = mpmath.fdiv(count, total_bytes)
+        entropy = mpmath.fadd(entropy, mpmath.fmul(p, mpmath.log2(p)))
 
     return -entropy
 

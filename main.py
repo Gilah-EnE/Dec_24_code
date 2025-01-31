@@ -4,7 +4,7 @@ import kolmogorov_test
 import nist_sts
 import pearson_criterion
 import primary_analysis
-import statistical_analysis
+import compression_test
 import signature_analysis
 import image_splitter
 

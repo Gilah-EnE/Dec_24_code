@@ -1,7 +1,3 @@
-"""
-Ентропійний аналіз, тест на стиснення, хі-квадрат, тест Колмогорова-Смірнова, тест Шапіро-Вілка
-"""
-
 import bz2
 import gzip
 import lzma
@@ -11,25 +7,6 @@ from collections import Counter
 
 import mpmath
 import zstandard as zstd
-
-
-def entropy_estimation(data) -> float:
-    if type(data) in (bytes, bytearray):
-        pass
-    elif type(data) == str:
-        data = data.encode("utf-8")
-    else:
-        raise TypeError(f"A bytes-like object or string was expected, got {type(data)}")
-
-    byte_counts = Counter(data)
-    total_bytes = len(data)
-    entropy = mpmath.mpf(0)
-
-    for count in byte_counts.values():
-        p = mpmath.fdiv(count, total_bytes)
-        entropy = mpmath.fadd(entropy, mpmath.fmul(p, mpmath.log2(p)))
-
-    return -entropy
 
 
 def compression_test(data) -> dict:

@@ -6,33 +6,26 @@ import pearson_criterion
 import primary_analysis
 import compression_test
 import signature_analysis
-import image_splitter
+import image_operations
 
 from pathlib import Path
 import sys
 
 def run_tests(partition_path):
-    try:
-        print("Autocorrelation test started")
-        autocorr_value = autocorr_test.analyze_image_file(partition_path, False)
-        autocorr_verdict =  autocorr_value >= 0.05
-        print(f"Autocorr result: {autocorr_value} ({autocorr_verdict})")
-    except Exception as e:
-        print(f"Autocorrelation test failed: {e}")
-        autocorr_verdict = True
+    pass
 
 def main():
     print("---PARTITION ENCRYPTION FINDER PROTOTYPE---")
 
     try:
-        filename = "/home/gilah/Documents/test_gpt.bin"  # input("Enter path to the file: ")
+        filename = input("Enter path to the file: ")
         if not Path(filename).exists():
             raise FileNotFoundError
     except FileNotFoundError as e:
         print(f"Error: File {filename} not found.")
         sys.exit(1)
 
-    splits = image_splitter.split_image(fname=filename, dry_run=False)
+    splits = image_operations.split_image(fname=filename, dry_run=False)
 
     for idx, split in enumerate(splits):
         print(f"{idx+1}. {split}")
@@ -52,8 +45,7 @@ def main():
                 print(f"Selected partition #{int(partition)}")
                 selected_partitions.append(splits[int(partition) - 1])
             elif type(partition) not in [int, str] or int(partition) not in range(
-                1, len(splits) + 1
-            ):
+                1, len(splits) + 1) or partition == "":
                 raise ValueError("Wrong partition selection, try again")
         except ValueError as e:
             print(f"Error: {e}")

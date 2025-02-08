@@ -2,6 +2,7 @@ from collections import Counter
 from typing import Tuple, Union
 import time
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def calculate_kolmogorov_smirnov(
@@ -44,7 +45,8 @@ def calculate_kolmogorov_smirnov(
         "critical_value_001": 1.63 / np.sqrt(n),  # Критичне значення для α = 0.01
         "critical_value_005": 1.36 / np.sqrt(n),  # Критичне значення для α = 0.05
     }
-
+    plt.bar(counter.keys(), counter.values())
+    plt.show()
     return ks_statistic, info
 
 
@@ -76,21 +78,16 @@ def calculate_ks_file(partition_path: str):
         return False
     else:
         return True
-'''
-# test_bytes = bytes([1, 2, 3, 4, 5] * 1000)  # тестові дані
 
-with open("test.img", "rb") as file:
-    test_bytes = file.read()
-ks_statistic, info = calculate_kolmogorov_smirnov(test_bytes)
+# # test_bytes = bytes([1, 2, 3, 4, 5] * 1000)  # тестові дані
 
-print(f"Статистика Колмогорова-Смірнова: {ks_statistic}")
-print(f"Критичне значення (α = 0.01): {info['critical_value_001']}")
-print(f"Критичне значення (α = 0.05): {info['critical_value_005']}")
-print("\nІнтерпретація:")
-print(interpret_ks_result(ks_statistic, info["sample_size"]))
-'''
+# with open("test.img", "rb") as file:
+#     test_bytes = file.read()
+# ks_statistic, info = calculate_kolmogorov_smirnov(test_bytes)
 
-start = time.time()
-print(calculate_kolmogorov_smirnov("ext4_fs.bin"))
-end = time.time()
-print(end - start)
+# print(f"Статистика Колмогорова-Смірнова: {ks_statistic}")
+# print(f"Критичне значення (α = 0.01): {info['critical_value_001']}")
+# print(f"Критичне значення (α = 0.05): {info['critical_value_005']}")
+# print("\nІнтерпретація:")
+# print(interpret_ks_result(ks_statistic, info["sample_size"]))
+

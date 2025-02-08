@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from typing import List, Optional, Tuple
+import math
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -75,7 +76,7 @@ class DiskImageAnalyzer:
 
         return autocorr
 
-    def analyze_block(self, data: bytes, threshold: float = 0.1) -> Tuple[float, bool]:
+    def analyze_block(self, data: bytes, threshold: float = 0.05) -> Tuple[float, bool]:
         """
         Аналізує блок даних на предмет шифрування
 
@@ -118,12 +119,17 @@ class DiskImageAnalyzer:
             offset = start_offset + (i * self.block_size)
             data = self.read_image_block(image_path, offset)
 
+            if (offset/1024/1024) % 1 == 0:
+                print(offset/1024/1024, end=", ", flush=True)
+
             if data is None:
                 break
 
             mean_autocorr, is_encrypted = self.analyze_block(data)
             if not np.isnan(mean_autocorr):
                 results.append((offset, mean_autocorr, is_encrypted))
+            
+            del data
 
         return results
 
@@ -184,7 +190,7 @@ class DiskImageAnalyzer:
 
         # Додаємо горизонтальну лінію порогового значення
         plt.axhline(
-            y=0.1, color="g", linestyle="--", alpha=0.5, label="Поріг шифрування (0.1)"
+            y=0.05, color="g", linestyle="--", alpha=0.5, label="Поріг шифрування (0.05)"
         )
 
         plt.tight_layout()
@@ -218,10 +224,13 @@ class DiskImageAnalyzer:
 
 # Приклад використання:
 def analyze_image_file(image_path: str, plot: bool):
-    analyzer = DiskImageAnalyzer()
+    analyzer = DiskImageAnalyzer(block_size = 512)
+
+    image_size = os.stat(image_path).st_size
+    image_blocks = max(1, int(math.floor(image_size / analyzer.block_size)))
 
     # Аналіз великого регіону диску
-    results = analyzer.analyze_image_region(image_path, start_offset=0, num_blocks=5000)
+    results = analyzer.analyze_image_region(image_path, start_offset=0, num_blocks=image_blocks)
 
     autocorr_stat = list()
     for _, autocorr, _ in results:
@@ -234,4 +243,4 @@ def analyze_image_file(image_path: str, plot: bool):
     if plot:
         analyzer.plot_analysis_scatter(results, "Розподіл автокореляції по зсуву")
 
-    return np.std(autocorr_stat)
+    print(np.std(autocorr_stat))

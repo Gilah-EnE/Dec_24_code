@@ -1,30 +1,54 @@
-import bz2
-import gzip
-import lzma
-import statistics
-import zlib
-from collections import Counter
+import os
+import subprocess
+import time
 
-import mpmath
-import zstandard as zstd
+from line_profiler_pycharm import profile
 
 
-def compression_test(filename) -> dict:
+@profile
+def compression_test(filename: str) -> str:
+    filesize = os.path.getsize(filename)
     with open(filename, 'rb') as file:
-        data = file.read()
+        print("Starting test", end="\r")
 
-        zlib_compression = zlib.compress(data)
-        gzip_compression = gzip.compress(data)
-        bz2_compression  = bz2.compress(data)
-        lzma_compression = lzma.compress(data)
-        zstd_compression = zstd.compress(data)
+        gzip_compression = filesize / int(
+            subprocess.check_output(f"pigz < {filename} | wc -c", shell=True).decode())
+        print("GZip", end=" ")
 
-    results = {
-        "zlib": len(zlib_compression) / len(data),
-        "gzip": len(gzip_compression) / len(data),
-        "bz2":  len(bz2_compression)  / len(data),
-        "lzma": len(lzma_compression) / len(data),
-        "zstd": len(zstd_compression) / len(data),
-    }
+        lz4_compression = filesize / int(
+            subprocess.check_output(f"lz4 < {filename} | wc -c", shell=True).decode())
+        print("LZ4", end=" ")
 
-    return statistics.mean(list(results.values()))
+        bz2_compression = filesize / int(
+            subprocess.check_output(f"lbzip2 < {filename} | wc -c", shell=True).decode())
+        print("Bzip2", end=" ")
+
+        zstd_compression = filesize / int(
+            subprocess.check_output(f"zstd -T12 < {filename} | wc -c", shell=True).decode())
+        print("Zstd", end=" ")
+
+        xz_compression = filesize / int(
+            subprocess.check_output(f"pixz < {filename} | wc -c", shell=True).decode())
+        print("XZ", end=" ")
+
+    return f"\r{filename.split("/")[-1]} {gzip_compression} {lz4_compression} {bz2_compression} {zstd_compression} {xz_compression}"
+
+
+start = time.time()
+print(compression_test('/dataset/images/random.img'))
+print(compression_test('/dataset/images/kagura/kagura_data_dec.img'))
+print(compression_test('/dataset/images/kagura/kagura_data_dec_opt.img'))
+print(compression_test('/dataset/images/kagura/kagura_data_enc.img'))
+print(compression_test('/dataset/images/kagura/kagura_data_enc_opt.img'))
+print(compression_test('/dataset/images/vince/vince_data.img'))
+print(compression_test('/dataset/images/vince/vince_data_opt.img'))
+print(compression_test('/dataset/images/wd400.img'))
+print(compression_test('/dataset/images/wd400_opt.img'))
+print(compression_test('/dataset/images/miatoll/miatoll_data_fbe.img'))
+print(compression_test('/dataset/images/miatoll/miatoll_data_fbe_opt.img'))
+print(compression_test('/dataset/images/miatoll/miatoll_data_nonfbe.img'))
+print(compression_test('/dataset/images/miatoll/miatoll_data_nonfbe_opt.img'))
+print(compression_test('/dataset/images/adoptable.img'))
+print(compression_test('/dataset/images/adoptable_opt.img'))
+end = time.time()
+print(end - start)

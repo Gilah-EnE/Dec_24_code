@@ -1,34 +1,22 @@
+import time
 from collections import Counter
-from typing import List, Union
+from typing import List, Union, Any
 
 import numpy as np
 
 
-def calculate_pearson_criterion(bytes_data: Union[bytes, List[int]]) -> float:
-    """
-    Розраховує значення критерію Пірсона для набору байтів відносно рівномірного розподілу.
-
-    Args:
-        bytes_data: Набір байтів у вигляді bytes або список цілих чисел від 0 до 255
-
-    Returns:
-        float: Значення критерію Пірсона
-    """
-    # Перетворюємо вхідні дані в список байтів, якщо потрібно
-    if isinstance(bytes_data, bytes):
-        bytes_list = list(bytes_data)
-    else:
-        bytes_list = bytes_data
-
-    # Перевіряємо коректність вхідних даних
-    if not all(0 <= b <= 255 for b in bytes_list):
-        raise ValueError("Всі значення повинні бути в діапазоні 0-255")
-
-    # Підраховуємо кількість кожного байту
-    byte_counts = Counter(bytes_list)
-
-    # Загальна кількість байтів
-    n = len(bytes_list)
+def calculate_pearson_criterion(filename: str, bs: int) -> tuple[str, int | Any]:
+    byte_counts = Counter()
+    n = 0
+    with open(filename, 'rb') as file:
+        while True:
+            chunk = file.read(bs)
+            if not chunk:
+                break
+            n += len(chunk)
+            print(n/1024/1024, end='\r')
+            byte_counts += Counter(chunk)
+            del chunk
 
     # Очікувана кількість для рівномірного розподілу
     expected = n / 256
@@ -39,12 +27,12 @@ def calculate_pearson_criterion(bytes_data: Union[bytes, List[int]]) -> float:
         observed = byte_counts.get(byte_value, 0)
         chi_square += (observed - expected) ** 2 / expected
 
-    return chi_square
+    return filename, chi_square
 
 
 def interpret_pearson_result(
     chi_square: float, significance_level: float = 0.05
-) -> bool:
+) -> str:
     """
     Інтерпретує результат критерію Пірсона для рівня значущості.
 
@@ -64,10 +52,19 @@ def interpret_pearson_result(
         return "Розподіл відхиляється від рівномірного"
 
 
-'''with open("test.img", "rb") as file:
-    test_bytes = file.read()
-chi_square = calculate_pearson_criterion(test_bytes)
+# with open("test.img", "rb") as file:
+#     test_bytes = file.read()
+# chi_square = calculate_pearson_criterion(test_bytes)
+#
+# print("Статистика Пірсона:", chi_square)
+# print(interpret_pearson_result(chi_square=chi_square))
 
-print("Статистика Пірсона:", chi_square)
-print(interpret_pearson_result(chi_square=chi_square))
-'''
+start = time.time()
+print(calculate_pearson_criterion('/home/gilah/Dataset/images/vince/vince_data_opt.img', 1048576))
+end = time.time()
+print(end - start)
+# print(calculate_pearson_criterion('/home/gilah/Dataset/images/miatoll/miatoll_data_fbe_opt.img', 1048576))
+# print(calculate_pearson_criterion('/home/gilah/Dataset/images/miatoll/miatoll_data_nonfbe.img', 1048576))
+# print(calculate_pearson_criterion('/home/gilah/Dataset/images/miatoll/miatoll_data_nonfbe_opt.img', 1048576))
+# print(calculate_pearson_criterion('/home/gilah/Dataset/images/adoptable.img', 1048576))
+# print(calculate_pearson_criterion('/home/gilah/Dataset/images/adoptable_opt.img', 1048576))

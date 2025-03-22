@@ -1,9 +1,21 @@
 import re
 from typing import Any
+import time
 
+def split_dict_equally(input_dict, chunks=2):
+    "Splits dict by keys. Returns a list of dictionaries."
+    # prep with empty dicts
+    return_list = [dict() for idx in range(chunks)]
+    idx = 0
+    for k,v in input_dict.items():
+        return_list[idx][k] = v
+        if idx < chunks-1:  # indexes start at 0
+            idx += 1
+        else:
+            idx = 0
+    return return_list
 
 def find_bytes_pattern(data: bytes, regex) -> int:
-   
    return len(regex.findall(data)) # [match.start() for match in regex.finditer(data)]
 
 def perform_signature_analysis(filename: str, bs: int) -> dict[str | Any, int]:
@@ -755,7 +767,7 @@ def perform_signature_analysis(filename: str, bs: int) -> dict[str | Any, int]:
     with open(filename, 'rb') as file:
         n = 0
         while True:
-            chunk = file.read(bs * 1048576)
+            chunk = file.read(bs)
             if not chunk:
                 break
             n += len(chunk)
@@ -768,5 +780,19 @@ def perform_signature_analysis(filename: str, bs: int) -> dict[str | Any, int]:
             del chunk
             print('')
 
-    return {k:v for (k,v) in found_signatures_total.items() if v > 0} # повертаємо тільки знайдені сигнатури
+    with open(f"{filename.split("/")[-1]}_signatures_total.txt", "w") as file:
+        file.write(f"{filename}\t{sum(found_signatures_total.values())}\t{found_signatures_total}")
 
+    return found_signatures_total
+
+start = time.time()
+bsize = 1024*1024
+print(perform_signature_analysis("/home/gilah/Dataset/images/random.img", bsize))
+print(perform_signature_analysis("/home/gilah/Dataset/images/kagura/kagura_data_dec.img", bsize))
+print(perform_signature_analysis("/home/gilah/Dataset/images/kagura/kagura_data_dec_opt.img", bsize))
+print(perform_signature_analysis("/home/gilah/Dataset/images/kagura/kagura_data_enc.img", bsize))
+print(perform_signature_analysis("/home/gilah/Dataset/images/kagura/kagura_data_enc_opt.img", bsize))
+print(perform_signature_analysis("/home/gilah/Dataset/images/vince/vince_data.img", bsize))
+print(perform_signature_analysis("/home/gilah/Dataset/images/vince/vince_data_opt.img", bsize))
+end = time.time()
+print(end-start)

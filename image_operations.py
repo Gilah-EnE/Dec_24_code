@@ -53,8 +53,10 @@ def find_empty_regions(file_path: str, block_size: int = 512) -> List[Tuple[int,
         
         for pos in range(0, file_size, block_size):
             # Читаємо блок даних
-            block = mm[pos:min(pos + block_size, file_size)]
-            
+            current_offset = min(pos + block_size, file_size)
+            block = mm[pos:current_offset]
+            if (current_offset / 1048576) % 1 == 0:
+                print("Analyzing: ", current_offset/1048576, end='\r')
             # Перевіряємо чи блок порожній (містить лише нулі)
             is_empty = all(b == 0 for b in block)
             
@@ -67,7 +69,7 @@ def find_empty_regions(file_path: str, block_size: int = 512) -> List[Tuple[int,
         # Додаємо останній регіон, якщо він порожній
         if region_start is not None:
             empty_regions.append((region_start, file_size))
-        
+        print('')
         mm.close()
     
     return empty_regions
@@ -89,9 +91,21 @@ def optimize_disk_image(input_path: str, output_path: str, block_size: int = 512
         
         for start, end in empty_regions:
             # Копіюємо дані до порожнього регіону
+
             if current_pos < start:
                 src.seek(current_pos)
-                dst.write(src.read(start - current_pos))
+                # Читаємо та записуємо файл блоками по 1 МБ
+                bytes_to_copy = start - current_pos
+                buffer_size = 512
+
+                while bytes_to_copy > 0:
+                    print(f"Copying {bytes_to_copy} bytes from {start} to {end}                             ", end='\r')
+                    chunk_size = min(buffer_size, bytes_to_copy)
+                    chunk = src.read(chunk_size)
+                    if not chunk:
+                        break
+                    dst.write(chunk)
+                    bytes_to_copy -= len(chunk)
             
             # Пропускаємо порожній регіон
             current_pos = end
@@ -100,3 +114,12 @@ def optimize_disk_image(input_path: str, output_path: str, block_size: int = 512
         if current_pos < os.path.getsize(input_path):
             src.seek(current_pos)
             dst.write(src.read())
+
+    print(f"{input_path.split("/")[-1]} -> {output_path.split("/")[-1]}: Done")
+
+optimize_disk_image(
+    '/dataset/images/miatoll/miatoll_data_nonfbe.img',
+    '/dataset/images/miatoll/miatoll_data_nonfbe_opt.img',
+    4096
+)
+# optimize_disk_image('/home/gilah/Dataset/images/vince/vince_data.img', '/home/gilah/Dataset/images/vince/vince_data_opt.img', 4096)

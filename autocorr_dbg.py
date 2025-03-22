@@ -6,6 +6,7 @@ from typing import List, Optional, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
+from line_profiler_pycharm import profile
 
 
 def validate_image_file(image_path: str) -> bool:
@@ -13,6 +14,7 @@ def validate_image_file(image_path: str) -> bool:
     return path.exists() and path.is_file() and os.access(path, os.R_OK)
 
 
+@profile
 def read_image_block(image_path: str, offset: int, block_size: int) -> Optional[bytes]:
     try:
         if not validate_image_file(image_path):
@@ -28,6 +30,7 @@ def read_image_block(image_path: str, offset: int, block_size: int) -> Optional[
         print(f"Помилка читання файлу: {e}")
         return None
 
+@profile
 def calculate_autocorrelation(data: bytes, max_lag: int = 50):
     values = np.frombuffer(data, dtype=np.uint8)
     values = values - np.mean(values)
@@ -41,6 +44,7 @@ def calculate_autocorrelation(data: bytes, max_lag: int = 50):
 
     return autocorr
 
+@profile
 def analyze_block(data: bytes, threshold: float = 0.05) -> Tuple[float, bool]:
     if not data:
         return 0.0, False
@@ -54,6 +58,7 @@ def analyze_block(data: bytes, threshold: float = 0.05) -> Tuple[float, bool]:
 
     return mean_autocorr, is_encrypted
 
+@profile
 def analyze_image_region(image_path: str, start_offset: int, block_size: int, num_blocks: int = 10) -> List[
     Tuple[int, float, bool]]:
     results = []
@@ -76,6 +81,7 @@ def analyze_image_region(image_path: str, start_offset: int, block_size: int, nu
 
     return results
 
+@profile
 def plot_analysis_scatter(
         results: List[Tuple[int, float, bool]],
         title: str = "Анализ автокорреляции по сдвигам",
@@ -132,6 +138,7 @@ def plot_analysis_scatter(
     plt.tight_layout()
     plt.savefig(filename)
 
+@profile
 def plot_autocorrelation(data: bytes, title: str = "График автокорреляции"):
     """
     Візуалізує автокореляційну функцію
@@ -157,11 +164,19 @@ def plot_autocorrelation(data: bytes, title: str = "График автокор�
     plt.grid(True)
     plt.show()
 
+@profile
 def analyze_image_file(image_path: str, bs: int, plot: bool):
     image_size = os.stat(image_path).st_size
     image_blocks = max(1, int(math.floor(image_size / bs)))
 
     results = analyze_image_region(image_path, start_offset=0, num_blocks=image_blocks, block_size=bs)
+
+    cumsum = np.cumsum([r[1] for r in results])
+
+    plot, ax = plt.subplots()
+    ax.plot(cumsum)
+    plt.tight_layout()
+    plt.show()
 
     autocorr_stat = list()
     for _, autocorr, _ in results:
@@ -179,6 +194,6 @@ def analyze_image_file(image_path: str, bs: int, plot: bool):
     print(image_path, np.std(autocorr_stat))
 
 start = time.time()
-analyze_image_file('/home/gilah/Dataset/images/random_32M.img', 1048576, True)
+analyze_image_file('/home/gilah/Dataset/images/vince/vince_data.img', 1024*1024, False)
 end = time.time()
 print(end - start)

@@ -5,19 +5,7 @@ from typing import List, Union, Any
 import numpy as np
 
 
-def calculate_pearson_criterion(filename: str, bs: int) -> tuple[str, int | Any]:
-    byte_counts = Counter()
-    n = 0
-    with open(filename, 'rb') as file:
-        while True:
-            chunk = file.read(bs)
-            if not chunk:
-                break
-            n += len(chunk)
-            print(n/1024/1024, end='\r')
-            byte_counts += Counter(chunk)
-            del chunk
-
+def calculate_pearson_criterion(filename: str, n: int, byte_counts: Counter) -> tuple[str, int | Any]:
     # Очікувана кількість для рівномірного розподілу
     expected = n / 256
 
@@ -50,21 +38,3 @@ def interpret_pearson_result(
         return "Розподіл можна вважати рівномірним"
     elif chi_square > critical_value:
         return "Розподіл відхиляється від рівномірного"
-
-
-# with open("test.img", "rb") as file:
-#     test_bytes = file.read()
-# chi_square = calculate_pearson_criterion(test_bytes)
-#
-# print("Статистика Пірсона:", chi_square)
-# print(interpret_pearson_result(chi_square=chi_square))
-
-start = time.time()
-print(calculate_pearson_criterion('/home/gilah/Dataset/images/vince/vince_data_opt.img', 1048576))
-end = time.time()
-print(end - start)
-# print(calculate_pearson_criterion('/home/gilah/Dataset/images/miatoll/miatoll_data_fbe_opt.img', 1048576))
-# print(calculate_pearson_criterion('/home/gilah/Dataset/images/miatoll/miatoll_data_nonfbe.img', 1048576))
-# print(calculate_pearson_criterion('/home/gilah/Dataset/images/miatoll/miatoll_data_nonfbe_opt.img', 1048576))
-# print(calculate_pearson_criterion('/home/gilah/Dataset/images/adoptable.img', 1048576))
-# print(calculate_pearson_criterion('/home/gilah/Dataset/images/adoptable_opt.img', 1048576))

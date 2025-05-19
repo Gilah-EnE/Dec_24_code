@@ -176,9 +176,4 @@ def analyze_image_file(image_path: str, bs: int, plot: bool):
                               f"Распределение средних значений коэф. автокорреляции в файле \"{image_path.split('/')[-1]}\", размер блока {bs} байт",
                               f"/home/gilah/{image_path.split('/')[-1]}.png")
 
-    print(image_path, np.std(autocorr_stat))
-
-start = time.time()
-analyze_image_file('/home/gilah/Dataset/images/random_32M.img', 1048576, True)
-end = time.time()
-print(end - start)
+    return image_path, np.std(autocorr_stat)

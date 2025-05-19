@@ -82,5 +82,3 @@ def nist_tests(filename: str, bs: int):
                 excursions_verdict,
                 excursions_var_verdict,
             ])
-
-nist_tests("/dataset/images/random_32M.img", 1048576)

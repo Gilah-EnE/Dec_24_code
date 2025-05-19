@@ -5,9 +5,6 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 from collections import Counter
 
-from statsmodels.graphics.regressionplots import plot_ceres_residuals
-
-
 def plot_file_cdf(filename_unopt: str, filename_opt: str, bs: int) -> None:
     n_unopt = 0
     n_opt = 0
@@ -41,9 +38,11 @@ def plot_file_cdf(filename_unopt: str, filename_opt: str, bs: int) -> None:
     theoretical_cdf = np.linspace(1 / 256, 1, 256)
 
     plt.figure(figsize=(8,6))
-    sns.kdeplot(data = theoretical_cdf, cumulative = True, label = "Теоретическое распределение")
-    sns.kdeplot(data = empirical_cdf_unopt, cumulative = True, label = filename_unopt.split('/')[-1])
-    # sns.kdeplot(data = empirical_cdf_opt, cumulative = True, label = filename_opt.split('/')[-1])
+    bw_factor = 0.01 # фактор згладжування графіку
+    sns.kdeplot(data = theoretical_cdf, cumulative = True, label = "Theoretical CDF", bw_method=bw_factor)
+    sns.kdeplot(data = empirical_cdf_unopt, cumulative = True, label = filename_unopt.split('/')[-1], bw_method=bw_factor)
+    sns.kdeplot(data = empirical_cdf_opt, cumulative = True, label = filename_opt.split('/')[-1], bw_method=bw_factor)
+    
     plt.legend()
     plt.tight_layout()
     plt.show()
@@ -59,7 +58,7 @@ def calculate_emp_cdf(counter: Counter, n):
     return empirical_cdf
 
 with ProcessPoolExecutor(max_workers=8) as executor:
-    executor.submit(plot_file_cdf,"/dataset/images/random.img", "/dataset/images/plaintext.txt", bs=1048576)
+    executor.submit(plot_file_cdf,"/dataset/images/random_32M.img", "/dataset/images/plaintext.txt", bs=1048576)
     # executor.submit(plot_file_cdf,"/dataset/images/wd400.img", "/dataset/images/wd400_opt.img", bs=1048576)
     # executor.submit(plot_file_cdf,"/dataset/images/kagura/kagura_data_dec.img", "/dataset/images/kagura/kagura_data_dec_opt.img", bs=1048576)
     # executor.submit(plot_file_cdf,"/dataset/images/kagura/kagura_data_enc.img", "/dataset/images/kagura/kagura_data_enc_opt.img", bs=1048576)
